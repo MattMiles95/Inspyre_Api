@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
 
     # Local apps
+    'likes',
     'posts',
     'profiles',
 ]
