@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import Truncator
 
+APPROVAL_STATUS = ((0, "Approved"), (1, "Reported"))
+
+
 class PostTag(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -27,6 +30,7 @@ class Post(models.Model):
         blank=True,
         related_name='posts'
     )
+    approval_status = models.IntegerField(choices=APPROVAL_STATUS, default=0)
 
     def get_thumbnail_url(self):
         """Returns URL for thumbnail display"""

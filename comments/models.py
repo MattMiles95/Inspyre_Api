@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from posts.models import Post
 
+APPROVAL_STATUS = ((0, "Approved"), (1, "Reported"))
+
 
 class Comment(models.Model):
     """
@@ -12,6 +14,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
+    approval_status = models.IntegerField(choices=((0, "Approved"), (1, "Reported")), default=0)
 
     class Meta:
         ordering = ['-created_at']
