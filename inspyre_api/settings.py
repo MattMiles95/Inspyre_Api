@@ -93,6 +93,7 @@ INSTALLED_APPS = [
 
     # Local apps
     'comments',
+    'direct_messages',
     'followers',
     'likes',
     'posts',
