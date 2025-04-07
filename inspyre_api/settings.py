@@ -63,7 +63,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # DEBUG = 'DEV' in os.environ 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'https://inspyre-api-6e178387b3cb.herokuapp.com/']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'inspyre-api-6e178387b3cb.herokuapp.com']
 
 
 # Application definition
