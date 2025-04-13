@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from posts.models import Post, PostTag
 from likes.models import Like
-import bleach
-
 
 class PostSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
@@ -35,24 +33,8 @@ class PostSerializer(serializers.ModelSerializer):
             return like.id if like else None
         return None
 
-    def sanitize_content(self, content):
-        allowed_tags = bleach.sanitizer.ALLOWED_TAGS + [
-            'p', 'strong', 'em', 'u', 's', 'span', 'br', 'ul', 'ol', 'li'
-        ]
-        allowed_attributes = {
-            '*': ['style', 'class'],
-            'span': ['style', 'class'],
-            'p': ['class', 'style'],
-            'li': ['class', 'data-list'],
-        }
-        return bleach.clean(content, tags=allowed_tags, attributes=allowed_attributes)
-
     def create(self, validated_data):
         tags_str = validated_data.pop('tags', '')
-        content = validated_data.get('content', '')
-        if content:
-            validated_data['content'] = self.sanitize_content(content)
-
         post = Post.objects.create(**validated_data)
         if tags_str:
             tag_names = [name.strip() for name in tags_str.split(',') if name.strip()]
@@ -64,13 +46,12 @@ class PostSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags_str = validated_data.pop('tags', None)
 
-        if 'content' in validated_data:
-            validated_data['content'] = self.sanitize_content(validated_data['content'])
-
+        # Update basic fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
+        # Update tags if 'tags' provided
         if tags_str is not None:
             instance.post_tags.clear()
             tag_names = [name.strip() for name in tags_str.split(',') if name.strip()]
