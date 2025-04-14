@@ -3,6 +3,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from inspyre_api.permissions import IsOwnerOrReadOnly
 from .models import Comment
 from .serializers import CommentSerializer, CommentDetailSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CommentList(generics.ListCreateAPIView):
@@ -16,11 +19,11 @@ class CommentList(generics.ListCreateAPIView):
     filterset_fields = ['post']
 
     def perform_create(self, serializer):
-        print("POST DATA:", self.request.data)
-        serializer.save(
-        owner=self.request.user,
-        post=self.request.data.get('post')
-    )
+        try:
+            serializer.save(owner=self.request.user)
+        except Exception as e:
+            logger.error(f"Comment creation failed: {e}")
+            raise
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
