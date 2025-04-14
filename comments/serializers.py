@@ -4,27 +4,30 @@ from .models import Comment
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Comment model
-    Adds three extra fields when returning a list of Comment instances
-    """
-
     owner = serializers.ReadOnlyField(source="owner.username")
     is_owner = serializers.SerializerMethodField()
     profile_id = serializers.ReadOnlyField(source="owner.profile.id")
     profile_image = serializers.ReadOnlyField(source="owner.profile.image.url")
     created_at = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
+    replies = serializers.SerializerMethodField()
+    parent = serializers.PrimaryKeyRelatedField(
+        queryset=Comment.objects.all(), required=False, allow_null=True
+    )
 
     def get_is_owner(self, obj):
-        request = self.context["request"]
-        return request.user == obj.owner
+        request = self.context.get("request")
+        return request.user == obj.owner if request else False
 
     def get_created_at(self, obj):
         return naturaltime(obj.created_at)
 
     def get_updated_at(self, obj):
         return naturaltime(obj.updated_at)
+
+    def get_replies(self, obj):
+        replies_qs = obj.replies.all().order_by("created_at")
+        return CommentSerializer(replies_qs, many=True, context=self.context).data
 
     class Meta:
         model = Comment
@@ -35,9 +38,12 @@ class CommentSerializer(serializers.ModelSerializer):
             "profile_id",
             "profile_image",
             "post",
+            "parent",
             "created_at",
             "updated_at",
             "content",
+            "approval_status",
+            "replies",
         ]
 
 
