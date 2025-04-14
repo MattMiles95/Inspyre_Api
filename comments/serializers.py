@@ -3,6 +3,17 @@ from rest_framework import serializers
 from .models import Comment
 
 
+class RecursiveField(serializers.Serializer):
+    def to_representation(self, value):
+        serializer_class = self.parent.parent.__class__
+
+        if isinstance(self.parent, serializers.ListSerializer):
+            serializer_class = self.parent.parent.__class__
+        else:
+            serializer_class = self.parent.__class__
+        return serializer_class(value, context=self.context).data
+
+
 class CommentSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source="owner.username")
     is_owner = serializers.SerializerMethodField()
@@ -10,7 +21,7 @@ class CommentSerializer(serializers.ModelSerializer):
     profile_image = serializers.ReadOnlyField(source="owner.profile.image.url")
     created_at = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
-    replies = serializers.SerializerMethodField()
+    replies = RecursiveField(many=True)
     parent = serializers.PrimaryKeyRelatedField(
         queryset=Comment.objects.all(), required=False, allow_null=True
     )
@@ -24,10 +35,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def get_updated_at(self, obj):
         return naturaltime(obj.updated_at)
-
-    def get_replies(self, obj):
-        replies_qs = obj.replies.all().order_by("created_at")
-        return CommentSerializer(replies_qs, many=True, context=self.context).data
 
     class Meta:
         model = Comment
