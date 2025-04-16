@@ -67,7 +67,7 @@ def trending_posts(request):
     trending = (
         Post.objects.filter(approval_status=0)
         .annotate(likes_count=Count("likes", distinct=True))
-        .order_by("-likes_count")[:6]
+        .order_by("-likes_count")[:10]
     )
     serializer = PostSerializer(trending, many=True, context={"request": request})
     return Response(serializer.data)
