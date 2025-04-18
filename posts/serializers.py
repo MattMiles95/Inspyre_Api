@@ -2,6 +2,13 @@ from rest_framework import serializers
 from posts.models import Post, PostTag
 from likes.models import Like
 
+
+class PostTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostTag
+        fields = ['name']
+
+
 class PostSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     is_owner = serializers.SerializerMethodField()
@@ -10,7 +17,7 @@ class PostSerializer(serializers.ModelSerializer):
     like_id = serializers.SerializerMethodField()
     likes_count = serializers.ReadOnlyField()
     comments_count = serializers.ReadOnlyField()
-    post_tags = serializers.StringRelatedField(many=True, read_only=True)
+    post_tags = PostTagSerializer(many=True, read_only=True)
     tags = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     def validate_image(self, value):
