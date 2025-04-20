@@ -36,7 +36,6 @@ class PostList(generics.ListCreateAPIView):
         "title",
         "content",
         "post_tags__name",
-        "profile_tags__name",
     ]
     ordering_fields = [
         "comments_count",
