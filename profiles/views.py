@@ -3,7 +3,13 @@ from rest_framework import generics, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from inspyre_api.permissions import IsOwnerOrReadOnly
 from .models import Profile
-from .serializers import ProfileSerializer
+from .serializers import ProfileSerializer, ProfileTagSerializer
+from .models import ProfileTag
+
+
+class ProfileTagListView(generics.ListAPIView):
+    queryset = ProfileTag.objects.all()
+    serializer_class = ProfileTagSerializer
 
 
 class ProfileList(generics.ListAPIView):
