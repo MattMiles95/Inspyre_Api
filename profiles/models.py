@@ -8,7 +8,6 @@ class ProfileTag(models.Model):
         ("writer", "Writer"),
         ("artist", "Artist"),
         ("photographer", "Photographer"),
-        ("musician", "Musician"),
     ]
     name = models.CharField(max_length=50, choices=profile_tags_choices, unique=True)
 
