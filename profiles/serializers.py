@@ -17,7 +17,12 @@ class ProfileSerializer(serializers.ModelSerializer):
     posts_count = serializers.ReadOnlyField()
     followers_count = serializers.ReadOnlyField()
     following_count = serializers.ReadOnlyField()
-    profile_tags = serializers.StringRelatedField(many=True)
+    profile_tags = serializers.PrimaryKeyRelatedField(
+        queryset=ProfileTag.objects.all(), many=True, write_only=True
+    )
+    profile_tags_display = ProfileTagSerializer(
+        source="profile_tags", many=True, read_only=True
+    )
 
     def get_is_owner(self, obj):
         request = self.context["request"]
@@ -46,4 +51,5 @@ class ProfileSerializer(serializers.ModelSerializer):
             "followers_count",
             "following_count",
             "profile_tags",
+            "profile_tags_display",
         ]
