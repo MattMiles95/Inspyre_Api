@@ -21,6 +21,7 @@ class PostList(generics.ListCreateAPIView):
         comments_count=Count("comment", distinct=True),
         likes_count=Count("likes", distinct=True),
     ).order_by("-created_at")
+
     filter_backends = [
         filters.OrderingFilter,
         filters.SearchFilter,
@@ -30,6 +31,7 @@ class PostList(generics.ListCreateAPIView):
         "owner__followed__owner__profile",
         "likes__owner__profile",
         "owner__profile",
+        "owner__profile__profile_tags__name",
     ]
     search_fields = [
         "owner__username",
