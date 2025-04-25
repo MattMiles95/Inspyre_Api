@@ -50,7 +50,6 @@ class MessageListAPIView(ListCreateAPIView):
         except User.DoesNotExist:
             raise serializers.ValidationError("Receiver not found.")
 
-        # Find an existing conversation between sender and receiver
         conversation = (
             Conversation.objects.filter(participants=self.request.user)
             .filter(participants=receiver)
@@ -58,7 +57,6 @@ class MessageListAPIView(ListCreateAPIView):
         )
 
         if not conversation:
-            # Create a new conversation if it doesn't exist
             conversation = Conversation.objects.create()
             conversation.participants.add(self.request.user, receiver)
 
@@ -80,6 +78,11 @@ class MessageDetailAPIView(APIView):
                     {"error": "You don't have permission to view this message"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
+
+            if message.receiver == request.user and not message.read:
+                message.read = True
+                message.save()
+
             serializer = DirectMessageSerializer(message)
             return Response(serializer.data)
         except DirectMessage.DoesNotExist:
