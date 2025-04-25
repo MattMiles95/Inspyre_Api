@@ -2,14 +2,13 @@ from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from django.db.models import Q
-from .models import DirectMessage
-from .models import Conversation
-from .serializers import DirectMessageSerializer
+from .models import DirectMessage, Conversation
+from .serializers import DirectMessageSerializer, ConversationSerializer
 
 
 class MessagePagination(PageNumberPagination):
@@ -106,3 +105,14 @@ class MessageDetailAPIView(APIView):
             return Response(
                 {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
+
+class ConversationListAPIView(ListAPIView):
+    serializer_class = ConversationSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = MessagePagination
+
+    def get_queryset(self):
+        return Conversation.objects.filter(participants=self.request.user).order_by(
+            "-created_at"
+        )
