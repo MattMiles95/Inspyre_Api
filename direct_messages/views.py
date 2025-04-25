@@ -106,6 +106,21 @@ class MessageDetailAPIView(APIView):
                 {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
+    def delete(self, request, message_id):
+        try:
+            message = DirectMessage.objects.get(id=message_id)
+            if message.sender != request.user:
+                return Response(
+                    {"error": "You don't have permission to delete this message"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            message.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except DirectMessage.DoesNotExist:
+            return Response(
+                {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
 
 class ConversationListAPIView(ListAPIView):
     serializer_class = ConversationSerializer
@@ -116,3 +131,22 @@ class ConversationListAPIView(ListAPIView):
         return Conversation.objects.filter(participants=self.request.user).order_by(
             "-created_at"
         )
+
+
+class ConversationDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, conversation_id):
+        try:
+            conversation = Conversation.objects.get(id=conversation_id)
+            if request.user not in conversation.participants.all():
+                return Response(
+                    {"error": "You don't have permission to delete this conversation"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            conversation.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Conversation.DoesNotExist:
+            return Response(
+                {"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND
+            )
