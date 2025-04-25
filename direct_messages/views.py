@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from django.db.models import Q
 from .models import DirectMessage, Conversation
-from .serializers import DirectMessageSerializer, ConversationSerializer
+from .serializers import DirectMessageSerializer, ConversationSerializer, UserSerializer
 
 
 class MessagePagination(PageNumberPagination):
@@ -150,3 +150,18 @@ class ConversationDetailAPIView(APIView):
             return Response(
                 {"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
+
+class UserListAPIView(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [OrderingFilter]
+    ordering_fields = ["username"]
+
+    def get_queryset(self):
+        queryset = User.objects.all()
+        search = self.request.query_params.get("search", None)
+        if search:
+            queryset = queryset.filter(username__icontains=search)
+        return queryset
