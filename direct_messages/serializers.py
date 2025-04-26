@@ -31,6 +31,9 @@ class DirectMessageSerializer(serializers.ModelSerializer):
             "read",
             "preview",
         ]
+        extra_kwargs = {
+            "conversation": {"read_only": True},
+        }
 
 
 class ConversationSerializer(serializers.ModelSerializer):
