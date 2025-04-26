@@ -25,15 +25,21 @@ class MessageListAPIView(ListCreateAPIView):
     ordering_fields = ["created_at", "read"]
 
     def get_queryset(self):
-        receiver_id = self.request.GET.get("receiver")
         conversation_id = self.request.GET.get("conversation_id")
+        receiver_id = self.request.GET.get("receiver")
 
         if conversation_id:
+            try:
+                conversation = Conversation.objects.get(id=conversation_id)
+            except Conversation.DoesNotExist:
+                return DirectMessage.objects.none()
+
+            if self.request.user not in conversation.participants.all():
+                return DirectMessage.objects.none()
+
             return DirectMessage.objects.filter(
-                conversation_id=conversation_id, sender=self.request.user
-            ) | DirectMessage.objects.filter(
-                conversation_id=conversation_id, receiver=self.request.user
-            )
+                conversation=conversation
+            ).select_related("sender", "receiver")
 
         if receiver_id:
             try:
