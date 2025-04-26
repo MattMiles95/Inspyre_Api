@@ -151,6 +151,21 @@ class ConversationListAPIView(ListAPIView):
 class ConversationDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, conversation_id):
+        try:
+            conversation = Conversation.objects.get(id=conversation_id)
+            if request.user not in conversation.participants.all():
+                return Response(
+                    {"error": "You don't have permission to view this conversation"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            serializer = ConversationSerializer(conversation)
+            return Response(serializer.data)
+        except Conversation.DoesNotExist:
+            return Response(
+                {"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
     def delete(self, request, conversation_id):
         try:
             conversation = Conversation.objects.get(id=conversation_id)
