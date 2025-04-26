@@ -26,18 +26,27 @@ class MessageListAPIView(ListCreateAPIView):
 
     def get_queryset(self):
         receiver_id = self.request.GET.get("receiver")
-        if not receiver_id:
-            return DirectMessage.objects.none()
+        conversation_id = self.request.GET.get("conversation_id")
 
-        try:
-            receiver = User.objects.get(id=receiver_id)
-        except User.DoesNotExist:
-            return DirectMessage.objects.none()
+        if conversation_id:
+            return DirectMessage.objects.filter(
+                conversation_id=conversation_id, sender=self.request.user
+            ) | DirectMessage.objects.filter(
+                conversation_id=conversation_id, receiver=self.request.user
+            )
 
-        return DirectMessage.objects.filter(
-            Q(sender=self.request.user, receiver=receiver)
-            | Q(sender=receiver, receiver=self.request.user)
-        ).select_related("sender", "receiver")
+        if receiver_id:
+            try:
+                receiver = User.objects.get(id=receiver_id)
+            except User.DoesNotExist:
+                return DirectMessage.objects.none()
+
+            return DirectMessage.objects.filter(
+                Q(sender=self.request.user, receiver=receiver)
+                | Q(sender=receiver, receiver=self.request.user)
+            ).select_related("sender", "receiver")
+
+        return DirectMessage.objects.none()
 
     def perform_create(self, serializer):
         receiver_id = self.request.data.get("receiver")
