@@ -37,6 +37,29 @@ class DirectMessageSerializer(serializers.ModelSerializer):
             "conversation": {"read_only": True},
         }
 
+    def create(self, validated_data):
+        sender = self.context["request"].user
+        receiver = validated_data["receiver"]
+
+        conversation = (
+            Conversation.objects.filter(participants=sender)
+            .filter(participants=receiver)
+            .first()
+        )
+
+        if not conversation:
+            conversation = Conversation.objects.create()
+            conversation.participants.set([sender, receiver])
+            conversation.save()
+
+        message = DirectMessage.objects.create(
+            sender=sender,
+            receiver=receiver,
+            conversation=conversation,
+            content=validated_data["content"],
+        )
+        return message
+
 
 class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)

@@ -54,30 +54,6 @@ class MessageListAPIView(ListCreateAPIView):
 
         return DirectMessage.objects.none()
 
-    def perform_create(self, serializer):
-        receiver_id = self.request.data.get("receiver")
-        if not receiver_id:
-            raise serializers.ValidationError("Receiver ID is required.")
-
-        try:
-            receiver = User.objects.get(id=receiver_id)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("Receiver not found.")
-
-        conversation = (
-            Conversation.objects.filter(participants=self.request.user)
-            .filter(participants=receiver)
-            .first()
-        )
-
-        if not conversation:
-            conversation = Conversation.objects.create()
-            conversation.participants.add(self.request.user, receiver)
-
-        serializer.save(
-            sender=self.request.user, receiver=receiver, conversation=conversation
-        )
-
 
 class MessageDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
