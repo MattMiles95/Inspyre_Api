@@ -39,7 +39,12 @@ class DirectMessageSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         sender = self.context["request"].user
-        receiver = validated_data["receiver"]
+        receiver_id = self.context["request"].data.get("receiver")
+
+        try:
+            receiver = User.objects.get(id=receiver_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Receiver not found.")
 
         conversation = (
             Conversation.objects.filter(participants=sender)
