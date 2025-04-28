@@ -25,7 +25,7 @@ class Profile(models.Model):
         ProfileTag, blank=True, related_name="profiles"
     )
     content = models.TextField(blank=True)
-    image = models.ImageField(upload_to="profile_images/", default="../ember_m0wtth")
+    image = models.ImageField(upload_to="profile_images/", default="../ember_wv8ywv")
 
     class Meta:
         ordering = ["-created_at"]
