@@ -135,7 +135,9 @@ class ConversationDetailAPIView(APIView):
                     {"error": "You don't have permission to view this conversation"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
-            serializer = ConversationSerializer(conversation)
+            serializer = ConversationSerializer(
+                conversation, context={"request": request}
+            )
             return Response(serializer.data)
         except Conversation.DoesNotExist:
             return Response(

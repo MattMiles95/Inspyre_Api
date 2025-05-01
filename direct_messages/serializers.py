@@ -69,6 +69,7 @@ class DirectMessageSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
     latest_message = serializers.SerializerMethodField()
+    other_user = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
@@ -78,6 +79,7 @@ class ConversationSerializer(serializers.ModelSerializer):
             "messages",
             "latest_message",
             "created_at",
+            "other_user",
         ]
 
     def get_latest_message(self, obj):
@@ -85,3 +87,11 @@ class ConversationSerializer(serializers.ModelSerializer):
         if latest:
             return DirectMessageSerializer(latest).data
         return None
+
+    def get_other_user(self, obj):
+        request = self.context.get("request")
+        if not request:
+            return None
+        user = request.user
+        other = obj.participants.exclude(id=user.id).first()
+        return UserSerializer(other).data if other else None
