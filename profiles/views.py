@@ -8,6 +8,8 @@ from inspyre_api.permissions import IsOwnerOrReadOnly
 from .models import Profile
 from .serializers import ProfileSerializer, ProfileTagSerializer
 from .models import ProfileTag
+from followers.models import Follower
+from followers.serializers import UserMiniSerializer
 
 
 class ProfileTagListView(generics.ListAPIView):
@@ -65,3 +67,25 @@ class UserDeleteView(APIView):
         user = request.user
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FollowersListView(generics.ListAPIView):
+    serializer_class = UserMiniSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs["pk"]
+        follower_ids = Follower.objects.filter(followed__id=user_id).values_list(
+            "owner", flat=True
+        )
+        return User.objects.filter(id__in=follower_ids)
+
+
+class FollowingListView(generics.ListAPIView):
+    serializer_class = UserMiniSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs["pk"]
+        following_ids = Follower.objects.filter(owner__id=user_id).values_list(
+            "followed", flat=True
+        )
+        return User.objects.filter(id__in=following_ids)
