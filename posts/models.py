@@ -11,26 +11,28 @@ class PostTag(models.Model):
     def __str__(self):
         return self.name
 
+
 class Post(models.Model):
     """
     Post model, related to 'owner', i.e. a User instance.
     Default image set so that we can always reference image.url.
     """
+
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)
     image = models.ImageField(
-        upload_to='images/',
+        upload_to="images/",
         blank=True,
     )
-    post_tags = models.ManyToManyField(
-        PostTag,
-        blank=True,
-        related_name='posts'
-    )
+    post_tags = models.ManyToManyField(PostTag, blank=True, related_name="posts")
     approval_status = models.IntegerField(choices=APPROVAL_STATUS, default=0)
+    original_author = models.BooleanField(
+        default=False,
+        help_text="Check this box if you are the original creator of this content.",
+    )
 
     def get_thumbnail_url(self):
         """Returns URL for thumbnail display"""
@@ -45,18 +47,12 @@ class Post(models.Model):
     def thumbnail(self):
         """Property to handle thumbnail display logic"""
         url = self.get_thumbnail_url()
-        if url.startswith('/content-preview/'):
-            return {
-                'type': 'content',
-                'preview': url.split('/')[-1]
-            }
-        return {
-            'type': 'image',
-            'url': url
-        }
+        if url.startswith("/content-preview/"):
+            return {"type": "content", "preview": url.split("/")[-1]}
+        return {"type": "image", "url": url}
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return f'{self.id} {self.title}'
+        return f"{self.id} {self.title}"

@@ -40,7 +40,7 @@ class PostSerializer(serializers.ModelSerializer):
             like = Like.objects.filter(owner=user, post=obj).first()
             return like.id if like else None
         return None
-    
+
     def get_profile_tags(self, obj):
         return [tag.name for tag in obj.owner.profile.profile_tags.all()]
 
@@ -91,4 +91,5 @@ class PostSerializer(serializers.ModelSerializer):
             "like_id",
             "likes_count",
             "comments_count",
+            "original_author",
         ]
