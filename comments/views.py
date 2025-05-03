@@ -20,19 +20,22 @@ class ReportComment(APIView):
             comment = Comment.objects.get(pk=pk)
             comment.approval_status = 1
             comment.save()
-            return Response({'status': 'comment reported'}, status=status.HTTP_200_OK)
+            return Response({"status": "comment reported"}, status=status.HTTP_200_OK)
         except Comment.DoesNotExist:
-            return Response({'error': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class CommentList(generics.ListCreateAPIView):
     """
     List comments or create a comment if logged in.
     """
+
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['post']
+    filterset_fields = ["post"]
 
     def get_queryset(self):
         return Comment.objects.filter(parent__isnull=True)
@@ -45,6 +48,7 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve a comment, or update or delete it by id if you own it.
     """
+
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = CommentDetailSerializer
     queryset = Comment.objects.all()
