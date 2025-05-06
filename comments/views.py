@@ -5,8 +5,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from inspyre_api.permissions import IsOwnerOrReadOnly
 from .models import Comment
 from .serializers import CommentSerializer, CommentDetailSerializer
-
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -20,10 +18,14 @@ class ReportComment(APIView):
             comment = Comment.objects.get(pk=pk)
             comment.approval_status = 1
             comment.save()
-            return Response({"status": "comment reported"}, status=status.HTTP_200_OK)
+            return Response(
+                {"status": "comment reported"},
+                status=status.HTTP_200_OK
+            )
         except Comment.DoesNotExist:
             return Response(
-                {"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Comment not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
 
 

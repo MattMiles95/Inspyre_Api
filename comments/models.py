@@ -14,7 +14,11 @@ class Comment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     parent = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="replies",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
