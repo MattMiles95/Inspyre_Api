@@ -9,7 +9,9 @@ class ProfileTag(models.Model):
         ("artist", "Artist"),
         ("photographer", "Photographer"),
     ]
-    name = models.CharField(max_length=50, choices=profile_tags_choices, unique=True)
+    name = models.CharField(
+        max_length=50, choices=profile_tags_choices, unique=True
+    )
 
     def __str__(self):
         return self.get_name_display()
@@ -25,7 +27,9 @@ class Profile(models.Model):
         ProfileTag, blank=True, related_name="profiles"
     )
     content = models.TextField(blank=True)
-    image = models.ImageField(upload_to="profile_images/", default="../ember_wv8ywv")
+    image = models.ImageField(
+        upload_to="profile_images/", default="../ember_wv8ywv"
+    )
 
     class Meta:
         ordering = ["-created_at"]

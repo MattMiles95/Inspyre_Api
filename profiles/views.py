@@ -74,7 +74,9 @@ class FollowersListView(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs["pk"]
-        follower_ids = Follower.objects.filter(followed__id=user_id).values_list(
+        follower_ids = Follower.objects.filter(
+            followed__id=user_id
+        ).values_list(
             "owner", flat=True
         )
         return User.objects.filter(id__in=follower_ids)
