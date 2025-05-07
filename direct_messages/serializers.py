@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Conversation, DirectMessage
 from django.contrib.auth.models import User
-import logging
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -86,23 +85,9 @@ class ConversationSerializer(serializers.ModelSerializer):
         ]
 
     def get_latest_message(self, obj):
-        try:
-            latest = DirectMessage.objects.filter(
-                conversation=obj
-            ).order_by("-created_at").first()
-
-            logging.info(f"Latest message for {obj.id}: {latest}")
-
-            if latest:
-                return {
-                    "id": latest.id,
-                    "content": latest.content,
-                    "created_at": latest.created_at,
-                    "sender": latest.sender.username,
-                }
-        except DirectMessage.DoesNotExist:
-            logging.warning(f"No messages found for conversation {obj.id}")
-            return None
+        latest = obj.messages.order_by("-created_at").first()
+        if latest:
+            return DirectMessageSerializer(latest).data
         return None
 
     def get_other_user(self, obj):

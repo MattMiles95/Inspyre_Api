@@ -46,8 +46,7 @@ class DirectMessage(models.Model):
             f"{truncated_content}"
         )
 
-
-@property
-def preview(self):
-    """Return a short preview of the message content."""
-    return Truncator(self.content).words(10)
+    @property
+    def preview(self):
+        """Return a short preview of the message content."""
+        return Truncator(self.content).words(10)
