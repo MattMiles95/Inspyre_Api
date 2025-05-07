@@ -73,5 +73,7 @@ def trending_posts(request):
         .annotate(likes_count=Count("likes", distinct=True))
         .order_by("-likes_count")[:10]
     )
-    serializer = PostSerializer(trending, many=True, context={"request": request})
+    serializer = PostSerializer(
+        trending, many=True, context={"request": request}
+    )
     return Response(serializer.data)

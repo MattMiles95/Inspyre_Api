@@ -19,15 +19,23 @@ class PostSerializer(serializers.ModelSerializer):
     likes_count = serializers.ReadOnlyField()
     comments_count = serializers.ReadOnlyField()
     post_tags = PostTagSerializer(many=True, read_only=True)
-    tags = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    tags = serializers.CharField(
+        write_only=True, required=False, allow_blank=True
+    )
 
     def validate_image(self, value):
         if value.size > 2 * 1024 * 1024:
-            raise serializers.ValidationError("Image size larger than 2MB!")
+            raise serializers.ValidationError(
+                "Image size larger than 2MB!"
+            )
         if value.image.height > 4096:
-            raise serializers.ValidationError("Image height larger than 4096px!")
+            raise serializers.ValidationError(
+                "Image height larger than 4096px!"
+            )
         if value.image.width > 4096:
-            raise serializers.ValidationError("Image width larger than 4096px!")
+            raise serializers.ValidationError(
+                "Image width larger than 4096px!"
+            )
         return value
 
     def get_is_owner(self, obj):
@@ -48,7 +56,9 @@ class PostSerializer(serializers.ModelSerializer):
         tags_str = validated_data.pop("tags", "")
         post = Post.objects.create(**validated_data)
         if tags_str:
-            tag_names = [name.strip() for name in tags_str.split(",") if name.strip()]
+            tag_names = [
+                name.strip() for name in tags_str.split(",") if name.strip()
+            ]
             for name in tag_names:
                 tag_obj, created = PostTag.objects.get_or_create(name=name)
                 post.post_tags.add(tag_obj)
@@ -65,7 +75,9 @@ class PostSerializer(serializers.ModelSerializer):
         # Update tags if 'tags' provided
         if tags_str is not None:
             instance.post_tags.clear()
-            tag_names = [name.strip() for name in tags_str.split(",") if name.strip()]
+            tag_names = [
+                name.strip() for name in tags_str.split(",") if name.strip()
+            ]
             for name in tag_names:
                 tag_obj, created = PostTag.objects.get_or_create(name=name)
                 instance.post_tags.add(tag_obj)

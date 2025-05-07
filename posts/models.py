@@ -27,11 +27,14 @@ class Post(models.Model):
         upload_to="images/",
         blank=True,
     )
-    post_tags = models.ManyToManyField(PostTag, blank=True, related_name="posts")
+    post_tags = models.ManyToManyField(
+        PostTag, blank=True, related_name="posts"
+    )
     approval_status = models.IntegerField(choices=APPROVAL_STATUS, default=0)
     original_author = models.BooleanField(
         default=False,
-        help_text="Check this box if you are the original creator of this content.",
+        help_text="Check this box if you are the original creator of this "
+        "content.",
     )
 
     def get_thumbnail_url(self):
