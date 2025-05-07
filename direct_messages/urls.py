@@ -14,7 +14,10 @@ urlpatterns = [
         MessageDetailAPIView.as_view(),
         name="message-detail",
     ),
-    path("conversations/", ConversationListAPIView.as_view(), name="conversation-list"),
+    path(
+        "conversations/",
+        ConversationListAPIView.as_view(),
+        name="conversation-list"),
     path(
         "conversations/<int:conversation_id>/",
         ConversationDetailAPIView.as_view(),

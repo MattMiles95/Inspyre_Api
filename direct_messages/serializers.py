@@ -6,7 +6,9 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model - handles participant references"""
 
-    profile_image = serializers.ImageField(source="profile.image", read_only=True)
+    profile_image = serializers.ImageField(
+        source="profile.image", read_only=True
+    )
 
     class Meta:
         model = User
