@@ -85,9 +85,19 @@ class ConversationSerializer(serializers.ModelSerializer):
         ]
 
     def get_latest_message(self, obj):
-        latest = obj.messages.order_by("-created_at").first()
-        if latest:
-            return DirectMessageSerializer(latest).data
+        try:
+            latest = DirectMessage.objects.filter(
+                conversation=obj
+            ).order_by("-created_at").first()
+            if latest:
+                return {
+                    "id": latest.id,
+                    "content": latest.content,
+                    "created_at": latest.created_at,
+                    "sender": latest.sender.username,
+                }
+        except DirectMessage.DoesNotExist:
+            return None
         return None
 
     def get_other_user(self, obj):
