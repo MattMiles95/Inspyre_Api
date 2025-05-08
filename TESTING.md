@@ -4,7 +4,7 @@ This is the TESTING file for the backend DRF API for [Inspyre](https://inspyre-5
 
 Return to the [README](./README.md)
 
-View the TESTING file for the frontend React app [here](#)
+View the TESTING file for the frontend React app [here](#https://github.com/MattMiles95/PP5_Inspyre_Frontend/blob/main/TESTING.md)
 
 ## Table of Contents
 
@@ -44,45 +44,44 @@ Extensive manual testing was conducted on the backend logic of this project to e
 
 ### Database
 
-| **Feature**           | **Expected Outcome** | **Result** |
-| --------------------- | -------------------- | ---------- |
-| Create Account        |                      | Pass       |
-| Delete Account        |                      | Pass       |
-| Post                  |                      | Pass       |
-| Post Edit             |                      | Pass       |
-| Post Delete           |                      | Pass       |
-| Follow                |                      | Pass       |
-| Unfollow              |                      | Pass       |
-| Like                  |                      | Pass       |
-| Unlike                |                      | Pass       |
-| Create Comment        |                      | Pass       |
-| Edit Comment          |                      | Pass       |
-| Delete Comment        |                      | Pass       |
-| Create Comment Thread |                      | Pass       |
-| Create Conversation   |                      | Pass       |
-| Delete Conversation   |                      | Pass       |
-| Send Message          |                      | Pass       |
+| **Feature**           | **Expected Outcome**                                                                                                                     | **Result** |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Create Account        | Given a user creates an account, a Profile is automatically created and assigned to that account.                                        | Pass       |
+| Delete Account        | Given an account is deleted, the child data of that account is also deleted.                                                             | Pass       |
+| Post                  | Given a user creates a post, that post is created in the expected location within the database.                                          | Pass       |
+| Post Edit             | Given a user edits a post, the details of that post stored in the database are updated accordingly.                                      | Pass       |
+| Post Delete           | Given a user deletes a post, the post and its associated comments and likes are removed from the database.                               | Pass       |
+| Follow                | Given a user follows another user, a new Follower instance is created and associated with both the follower and the followed user.       | Pass       |
+| Unfollow              | Given a user unfollows another user, the Follower instance is deleted from the database.                                                 | Pass       |
+| Like                  | Given a user likes a post, a new Like instance is created and associated with both the user and the post.                                | Pass       |
+| Unlike                | Given a user unlikes a post, the associated Like instance is deleted from the database.                                                  | Pass       |
+| Create Comment        | Given a user creates a comment on a post, a new Comment instance is created and associated with both the user and the post.              | Pass       |
+| Edit Comment          | Given a user edits their comment, the content of the Comment instance is updated in the database.                                        | Pass       |
+| Delete Comment        | Given a user deletes their comment, the Comment instance and its replies are removed from the database.                                  | Pass       |
+| Create Comment Thread | Given a user replies to a comment, the reply is associated with the parent comment, forming a comment thread.                            | Pass       |
+| Create Conversation   | Given a user sends a direct message to another user, a new Conversation instance is created if one does not already exist.               | Pass       |
+| Delete Conversation   | Given a user deletes a conversation, the Conversation instance and all associated messages are removed from the database.                | Pass       |
+| Send Message          | Given a user sends a message within a conversation, a new DirectMessage instance is created and associated with the sender and receiver. | Pass       |
 
 <br>
 
 ### Cloudinary
 
-| **Feature**           | **Expected Outcome** | **Result** |
-| --------------------- | -------------------- | ---------- |
-| File Upload           |                      | Pass       |
-| Default Profile Image |                      | Pass       |
+| **Feature**           | **Expected Outcome**                                                                                                                                                | **Result** |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| File Upload           | Given a user uploads an image, the file is successfully saved in the specified storage location within Cloudinary and associated with the relevant post or profile. | Pass       |
+| Default Profile Image | Given a user creates an account, the default profile image stored within Cloudinary is assigned to their profile until they upload a custom image.                  | Pass       |
 
 <br>
 
 ## Bug Fixes
 
-Throughout the development of my project, I carried out the following bug fixes:
+Throughout the development of Inspyre's backend, I carried out the following bug fixes:
 
-| Feature                         | Expected Outcome                                                                | Actual Outcome                                              | Fix                                                                                                                                                                                                     |
-| ------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Database                        | Updating models                                                                 | Couldn't reconcile changes made                             | Error caused by deleting previous migration files, ultimately corrupting the database. A new database was created to replace the corrupted database                                                     |
-| Cloudinary Security             | Secure responses received from Cloudinary                                       | HTTP responses instead of HTTPS, causing unsecure responses | Updated settings.py to configure secure responses from Cloudinary                                                                                                                                       |
-| Comment Report Button           | Reported comment's status changes from 'approved' to 'reported'                 | 500 error                                                   | Bug caused by the initial report button having the same id as the report button in the confirmation modal, causing a JavaScript error. ID changed to differentiate between buttons                      |
-| Comment Edit Button             | Clicking 'submit' button submits changes to comment                             | 500 error                                                   | ID 'submitButton' had been changed due to conflicting CSS, which caused a bug with the JavaScript. Html and JS updated with new ID                                                                      |
-| Homework Submission Lesson Menu | Lesson dropdown menu only contains lessons associated with the selected subject | Menu empty                                                  | Created Homework Dashboard as a means for the subject to be selected prior to reaching the submission page, allowing for the subject.id to be correctly assigned prior to accessing the submission form |
-| Homepage subject buttons        | Clicking a button directs the User to the respective lesson feed                | No response                                                 | href's had been left as '#'s. Updated with correct url links                                                                                                                                            |
+| Feature           | Expected Outcome                                                                 | Actual Outcome                                                  | Fix                                                                                             |
+| ----------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Heroku Deployment | App successfully deploys to Heroku.                                              | Heroku build failure due to incorrect 'ALLOWED_HOSTS' settings. | Correct syntax for 'ALLOWED_HOSTS'.                                                             |
+| Profile Tags      | Users can select pre-determined profile tags to display on their profile.        | Profile tags displaying as integers.                            | Change profile tags from a pk field to a string field.                                          |
+| Direct Messages   | Users can send and receive messages directly between each other.                 | Sent messages not being received.                               | Update get_queryset to filter by the Conversation object rather than conversation_id.           |
+| Direct Messages   | Messaging a user where no previous chat exists creates a conversation.           | Conversation not being created.                                 | Remove conversation creation from MessageListAPIView and add to serializers.                    |
+| Direct Messages   | Users can preview the most recent message of a chat in their conversations list. | Previews not appearing.                                         | Update get_latest_message to explicitly filter DirectMessage objects by the conversation field. |

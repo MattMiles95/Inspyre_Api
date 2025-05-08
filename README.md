@@ -16,12 +16,12 @@ Powering a dynamic content-sharing platform, the Inspyre DRF API supports secure
 
 ### [Design](#design-1)
 
-### [Features & Logic](#features--logic-1)
+### [Logic Behind the Features](#features--logic-1)
 
 - [Authorisation](#authorisation)
-- [Posts](#posts)
 - [Profiles](#profiles)
-- [Likes & Trending Posts](#likes--trending-posts)
+- [Posts](#posts)
+- [Likes](#likes--trending-posts)
 - [Follow System](#post-searchbar)
 - [Comments](#comments)
 - [Direct Messaging](#direct-messaging)
@@ -52,9 +52,17 @@ Powering a dynamic content-sharing platform, the Inspyre DRF API supports secure
 
 ## Design
 
+### Entity Relationship Diagram (ERD)
+
+The ERD below was my original concept for Inspyre's database and the relationship between it's models.
+
+![ERD for Inspyre database](./_README_docs/concept-erd.png)
+
 <br>
 
-## Features & Logic
+## Logic Behind the Features
+
+In the frontend app's README docment, I list all of the features utilised by Inspyre. Below I will detail the logic behind each of these features, and how each of the models contained within this project relate to each other.
 
 <br>
 
@@ -68,27 +76,284 @@ Permissions are carefully scoped using Django REST Framework's built-in permissi
 
 <br>
 
-### Posts
-
-<br>
-
 ### Profiles
 
+The **Profiles** app manages user profiles, associating each profile with a unique user and allowing them to customize their identity within the platform. Profiles also include user-defined tags that indicate their creative focus (e.g., writer, artist, photographer).
+
+#### Key Features:
+
+- **Profile Creation**: Automatically generated via Django signals when a new user registers.
+
+- **User Information**: Profiles store user information, including name, content (bio), and a profile image.
+
+- **Profile Tags**: Users can assign tags to their profile to indicate their areas of interest or expertise.
+
+- **Data Aggregation**: The app annotates each profile with counts of posts, followers, and following users.
+
+- **Profile Deletion**: The existing Profile model provides for users deleting their own profiles, which cascades to remove all associated data, including posts and comments. This feature has been temporarily removed, however, due to a persistent frontend bug that causes repeat 401 errors following account deletion. This bug is discussed in greater detail within the [frontend README](https://github.com/MattMiles95/PP5_Inspyre_Frontend/blob/main/README.md).
+
+---
+
+#### Relationship with Posts App
+
+Profiles are linked to posts through the owner field in the Posts model. Each profile can be the author of multiple posts, establishing a one-to-many relationship. When a profile is deleted, all associated posts are also removed, preserving data integrity. Post counts are dynamically calculated and included in profile data to provide users with a quick overview of their content contributions.
+
+---
+
+#### Relationship with Comments App
+
+Comments are also linked to profiles through the owner field in the Comments model. This creates a one-to-many relationship between a profile and its comments, allowing for aggregation of comment counts if needed.
+
+The profile’s image and name are included in comment data, providing context and enhancing engagement in comment threads. When a profile is deleted, all associated comments are also removed, preventing orphaned comment data.
+
+---
+
+#### Relationship with Direct Messages App
+
+Profiles are implicitly linked to direct messages through the User model, which serves as both the sender and receiver of messages. The owner field in the Profile model connects each profile to a specific user, allowing for message filtering based on profile data.
+
+Profile information (e.g., profile image, name) is included in direct messages to provide visual context during conversations. When a profile is deleted, all associated messages are also removed, ensuring data consistency and preventing privacy issues.
+
+---
+
+#### Relationship with Followers App
+
+The Followers app manages user relationships, allowing users to follow and be followed by others. Profiles are linked to followers via the owner field, creating a many-to-many relationship between users.
+
+Each profile includes follower and following counts, dynamically calculated based on data in the Followers app. When a profile is deleted, follower and following data are automatically removed, maintaining data integrity.
+
+The following_id field in the ProfileSerializer provides a quick reference to the current user’s follow status with a given profile, streamlining frontend rendering and interaction logic.
+
+---
+
+#### Endpoints:
+
+`/profiles/` - List all profiles with filtering by follower/following status and ordering options.
+
+`/profiles/<id>/` - Retrieve or update a specific profile (if the owner).
+
+`/profiles/<id>/followers/` - Retrieve a list of followers for a specific profile.
+
+`/profiles/<id>/following/` - Retrieve a list of users a specific profile is following.
+
+`/profiles/tags/` - Retrieve all available profile tags for filtering or display.
+
 <br>
 
-### Likes & Trending Posts
+### Posts
+
+The **Posts** app allows users to create and share content in the form of text and image-based posts. Posts are associated with their authors (user profiles) and can include tags that provide contextual categorization. Users can also indicate whether they are the original creators of the content by marking a post as an original.
+
+#### Key Features:
+
+- **Content Creation**: Users can create posts with text content, images, or both. The app enforces a 2MB size limit for images and validates image dimensions, capping both width and height at 4096px.
+
+- **Tagging System**: Posts can include tags to categorize content. These tags are dynamically created and associated with posts, enabling search / filtering based on tag names.
+
+- **Approval Status**: The existing Post model provides for posts being marked as either `Approved` (0) or `Reported` (1), with `Approved` being the default value. Reporting a post would temporarily hide it from other users and flag the post for moderation, allowing for content review and potential action. This feature was temporarily removed, as I decided that allowing any user to temporarily hide another user's post with a single report put too much power in the hands of an individual user. As a future feature, this system would be amended so that upon reporting a post, rather than having it immediately hidden pending moderator review, the moderators would instead be notified of the report and _then_ make a decision as to whether it should be removed. This is further discussed within the **Future Features** section of my [frontend README](https://github.com/MattMiles95/PP5_Inspyre_Frontend/blob/main/README.md).
+
+- **Thumbnail Display**: Posts include a `thumbnail` property that generates a content preview. If an image is present, it is used as the thumbnail; otherwise, the content text is truncated to a maximum of 50 words and displayed as a preview.
+
+- **Original Author**: Users can indicate whether they are the original creators of a post. This flag provides transparency for shared content, distinguishing original work from reposts.
+
+---
+
+#### Relationship with Profiles App
+
+Posts are linked to profiles through the `owner` field, establishing a one-to-many relationship. Each profile can be the author of multiple posts, and when a profile is deleted, all associated posts are also removed to maintain data integrity.
+
+Profile data is included in post serializers, allowing for the display of profile images, profile tags, and author information alongside post content.
+
+---
+
+#### Relationship with Comments App
+
+Posts act as the parent object for comments, forming a one-to-many relationship. Each comment is linked to a specific post, and when a post is deleted, all associated comments are also removed.
+
+The `comments_count` field is dynamically calculated for each post, providing a snapshot of engagement activity. This count is displayed alongside the post’s content, indicating the number of comments a post has received.
+
+---
+
+#### Relationship with Likes App
+
+Posts are associated with likes through a one-to-many relationship, where each post can receive multiple likes from different users.
+
+Each like is recorded in the **Likes** app, with a foreign key pointing to the associated post. The `likes_count` field is dynamically calculated for each post, indicating the level of engagement and popularity of a given post.
+
+Users can only like a post once, and the `like_id` field in the `PostSerializer` provides a quick reference to the user's like instance, allowing for efficient like/unlike operations.
+
+When a post is deleted, all associated likes are also removed to maintain data integrity.
+
+---
+
+#### Relationship with Followers App
+
+The **Followers** app indirectly influences post visibility. Posts from followed users can be filtered and displayed using the `owner__followed__owner__profile` field in the `filterset_fields`. The `following_id` field in the **ProfileSerializer** also enables efficient querying of posts from followed users, allowing for features like the personalized Pyres view.
+
+---
+
+#### Endpoints:
+
+`/posts/` - List all posts or create a new post (if authenticated). Allows filtering by profile, tags, and follower/following status.
+
+`/posts/<id>/` - Retrieve, update, or delete a specific post (if the owner).
+
+`/posts/trending/` - Retrieve the top 10 most liked posts, limited to approved content only.
 
 <br>
 
-### Follow System
+### Likes
+
+The **Likes** app allows users to express appreciation for posts by "liking" them. Each like is associated with a specific user and post, ensuring that users can only like a post once. This app provides functionality for creating, listing, and deleting likes.
+
+#### Key Features:
+
+- **Like Creation**: Users can like posts, associating a like instance with both the user and the post. The `unique_together` constraint prevents users from liking the same post multiple times.
+
+- **Duplicate Prevention**: The `create` method in the serializer handles integrity errors, ensuring that duplicate likes are not created.
+
+- **Like Count**: The number of likes for each post is dynamically calculated using annotation in the post serializer.
+
+- **Like Deletion**: Users can only delete their own likes (simply 'unliking' a post), maintaining data integrity and user freedom.
+
+---
+
+#### Relationship with Profiles App
+
+Likes are indirectly linked to profiles through the `owner` field in the **Like** model. Each like is associated with a specific user, and by extension, their profile. This allows the API to display user-specific like information, such as the user's profile image and username.
+
+The `like_id` field in the **PostSerializer** enables the frontend to determine whether the current user has liked a particular post, streamlining the user interface for displaying liked/unliked states.
+
+When a profile is deleted, all associated likes are also removed, ensuring that data consistency is maintained.
+
+---
+
+#### Relationship with Posts App
+
+Likes form a many-to-one relationship with posts, allowing multiple likes to be associated with a single post. Each like is connected to a specific post via the `post` field. This enables efficient querying and aggregation of like data, such as counting the total likes for a given post. The `likes_count` field in the **PostSerializer** dynamically calculates the number of likes a post has received.
+
+Liked posts can be filtered and displayed, allowing for features like the personalized Sparks view.
+
+When a post is deleted, all associated likes are also removed, preventing orphaned like records and maintaining data integrity.
+
+---
+
+#### Endpoints:
+
+`/likes/` - List all likes or create a new like (if authenticated). Users can only like each post once.
+`/likes/<id>/` - Retrieve or delete a specific like (if the owner).
+
+<br>
+
+### Followers
+
+The **Followers** app manages the follower-followed relationships between users, allowing users to follow and unfollow each other. This app is crucial for implementing features such as follower counts, personalized feeds, and notifications for new followers.
+
+#### Key Features:
+
+- **Following System**: Users can follow and unfollow other users, creating follower-followed relationships.
+
+- **Duplicate Prevention**: The `unique_together` constraint ensures that a user can only follow another user once, preventing redundant follow instances.
+
+- **Follow Count**: The number of followers and followings is dynamically calculated and included in profile data for display purposes.
+
+- **Follower Deletion**: Users can only unfollow users they are currently following, maintaining data integrity.
+
+---
+
+#### Relationship with Profiles App
+
+The **Followers** app is directly connected to profiles through the `owner` and `followed` fields. Each follower instance is associated with both a **follower profile** (`owner`) and a **followed profile** (`followed`). This creates a many-to-many relationship, where each profile can have multiple followers and can follow multiple other profiles.
+
+Follower and following counts are dynamically calculated in the **ProfileSerializer**, allowing for seamless integration of follower data within profile endpoints. The `UserMiniSerializer` is employed to provide profile information (e.g., username and profile image) when listing followers or following users, enabling a consistent data structure for follower data across the app.
+
+When a profile is deleted, all associated follower and following instances are also removed, preventing orphaned follow records and maintaining data consistency.
+
+---
+
+#### Endpoints:
+
+`/followers/` - List all follower instances or create a new follower instance (i.e., follow a user).  
+`/followers/<id>/` - Retrieve or delete a specific follower instance (i.e., unfollow a user).
 
 <br>
 
 ### Comments
 
+The **Comments** app provides the functionality for users to engage with posts through text-based comments and threaded replies. Each comment is associated with a specific post and can optionally act as a reply to another comment.
+
+#### Key Features:
+
+- **Commenting System**: Users can post comments on posts and reply to other comments, enabling nested conversations.
+
+- **Reporting Functionality**: Users can report inappropriate comments, which updates the comment’s approval_status field and flags it for review.
+
+- **Moderation**: Comment ownership is enforced, allowing only the comment owner to edit or delete their comments. The only exception to this is moderators, who can delete the comment via the Django admin panel.
+
+- **Recursive Replies**: Replies are structured as nested objects, supporting hierarchical comment threads.
+
+- **Approval Status**: Comments can have an approval_status of 0 (Approved) or 1 (Reported), allowing for content moderation.
+
+---
+
+#### Relationship with Posts App:
+
+Each comment is directly associated with a specific post, creating a one-to-many relationship between a post and its comments. This relationship is defined via a foreign key to the Post model (post = models.ForeignKey(Post, on_delete=models.CASCADE)), ensuring that when a post is deleted, all associated comments are also removed.
+
+Comments can only be created on existing posts, reinforcing data integrity and contextual relevance. This linkage allows for post-centric comment retrieval, enabling comment filtering by post through the API.
+
+---
+
+#### Relationship with Profiles App:
+
+Each comment is also associated with a user profile, establishing a one-to-many relationship between a user and their comments. The owner field connects each comment to its author via the User model (owner = models.ForeignKey(User, on_delete=models.CASCADE)). This connection is extended in the serializer to include the author's profile information, such as profile_image and profile_id, providing context and visual identification for each comment. This integration ensures that comments reflect the profile information of their authors and that profile deletions cascade to remove associated comments.
+
+---
+
+#### Endpoints:
+
+`/comments/` - List comments or create a new comment (authenticated users only).
+
+`/comments/`<id>/ - Retrieve, update, or delete a specific comment (if owner).
+
+`/comments/`<id>/report/ - Report a specific comment (authenticated users only).
+
 <br>
 
-### Direct Messaging
+### Direct Messages
+
+The **Direct Messages** app facilitates private messaging between users, allowing them to engage in one-on-one conversations. Each conversation consists of a series of direct messages exchanged between two participants. This app provides endpoints for creating, listing, and deleting messages, as well as managing conversation threads.
+
+#### Key Features:
+
+- **Conversation Threads**: Users can participate in direct conversation threads with other users. Each thread contains all messages exchanged between two participants.
+
+- **Message Creation**: Users can send direct messages to other users, and the app will automatically handle conversation creation if one does not already exist.
+
+- **Message Read Status**: Messages include a `read` field that is updated when the recipient views the message. At this time, this feature has not been implemented within the frontend, but is discussed further within the **Future Features** section of the [frontend README](https://github.com/MattMiles95/PP5_Inspyre_Frontend/blob/main/README.md).
+
+- **Message Preview**: Each message includes a `preview` property that provides a truncated version of the content for quick display in conversation listings.
+
+---
+
+#### Relationship with Profiles App
+
+Direct messages are indirectly connected to profiles through the User model, as each message includes a `sender` and `receiver` field, both of which are foreign keys to the User model. The associated profile data (e.g., profile image and username) is included in the message serializer to provide context within conversations.
+
+The **Conversation model** manages multiple participants, establishing a many-to-many relationship with the User model. This structure allows for flexible querying and efficient retrieval of all conversations involving a specific user.
+
+The `UserSerializer` includes profile information such as the profile image and username, allowing for consistent display of profile data across both direct messages and user listings.
+
+When a profile is deleted, all associated direct messages are also removed, ensuring data integrity and preventing orphaned message records.
+
+---
+
+#### Endpoints:
+
+`/direct-messages/` - List all messages or create a new message (if authenticated).  
+`/direct-messages/<id>/` - Retrieve, update, or delete a specific message (if the sender).  
+`/conversations/` - List all conversations involving the current user, ordered by the latest message.  
+`/conversations/<id>/` - Retrieve or delete a specific conversation (if a participant).
 
 <br>
 
