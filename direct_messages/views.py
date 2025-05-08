@@ -17,6 +17,7 @@ class MessagePagination(PageNumberPagination):
     Pagination class for messages, allowing customization of page size.
     Default page size is 20, with a maximum of 100 messages per page.
     """
+
     page_size = 20
     page_size_query_param = "page_size"
     max_page_size = 100
@@ -30,6 +31,7 @@ class MessageListAPIView(ListCreateAPIView):
     receiver ID.
     - POST: Create a new direct message for the authenticated user.
     """
+
     serializer_class = DirectMessageSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = MessagePagination
@@ -38,11 +40,10 @@ class MessageListAPIView(ListCreateAPIView):
 
     def get_queryset(self):
         """
-        Return a queryset of messages based on conversation ID or receiver ID.
+        Automatically mark unread messages as read when the conversation
+        is accessed.
         """
         conversation_id = self.request.GET.get("conversation_id")
-        receiver_id = self.request.GET.get("receiver")
-
         if conversation_id:
             try:
                 conversation = Conversation.objects.get(id=conversation_id)
@@ -52,19 +53,15 @@ class MessageListAPIView(ListCreateAPIView):
             if self.request.user not in conversation.participants.all():
                 return DirectMessage.objects.none()
 
+            # Mark unread messages as read
+            DirectMessage.objects.filter(
+                conversation=conversation,
+                receiver=self.request.user,
+                read=False
+            ).update(read=True)
+
             return DirectMessage.objects.filter(
                 conversation=conversation
-            ).select_related("sender", "receiver")
-
-        if receiver_id:
-            try:
-                receiver = User.objects.get(id=receiver_id)
-            except User.DoesNotExist:
-                return DirectMessage.objects.none()
-
-            return DirectMessage.objects.filter(
-                Q(sender=self.request.user, receiver=receiver)
-                | Q(sender=receiver, receiver=self.request.user)
             ).select_related("sender", "receiver")
 
         return DirectMessage.objects.none()
@@ -84,15 +81,13 @@ class MessageDetailAPIView(APIView):
         try:
             message = DirectMessage.objects.select_related(
                 "sender", "receiver"
-            ).get(id=message_id)
+            ).get(
+                id=message_id
+            )
 
-            if (
-                message.sender != request.user and
-                message.receiver != request.user
-            ):
+            if message.sender != request.user and message.receiver != request.user:
                 return Response(
-                    {"error": "You don't have permission "
-                     "to view this message"},
+                    {"error": "You don't have permission " "to view this message"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
@@ -104,8 +99,7 @@ class MessageDetailAPIView(APIView):
             return Response(serializer.data)
         except DirectMessage.DoesNotExist:
             return Response(
-                {"error": "Message not found"},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
     def patch(self, request, message_id):
@@ -114,8 +108,10 @@ class MessageDetailAPIView(APIView):
             message = DirectMessage.objects.get(id=message_id)
             if message.receiver != request.user:
                 return Response(
-                    {"error": "You don't have permission to mark "
-                     "this message as read"},
+                    {
+                        "error": "You don't have permission to mark "
+                        "this message as read"
+                    },
                     status=status.HTTP_403_FORBIDDEN,
                 )
             message.read = request.data.get("read", message.read)
@@ -124,8 +120,7 @@ class MessageDetailAPIView(APIView):
             return Response(serializer.data)
         except DirectMessage.DoesNotExist:
             return Response(
-                {"error": "Message not found"},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
     def delete(self, request, message_id):
@@ -133,16 +128,14 @@ class MessageDetailAPIView(APIView):
             message = DirectMessage.objects.get(id=message_id)
             if message.sender != request.user:
                 return Response(
-                    {"error": "You don't have permission to delete this "
-                     "message"},
+                    {"error": "You don't have permission to delete this " "message"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
             message.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except DirectMessage.DoesNotExist:
             return Response(
-                {"error": "Message not found"},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -150,14 +143,13 @@ class ConversationListAPIView(ListAPIView):
     """
     API view for listing conversations involving the authenticated user.
     """
+
     serializer_class = ConversationSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = MessagePagination
 
     def get_queryset(self):
-        return Conversation.objects.filter(
-            participants=self.request.user
-        ).order_by(
+        return Conversation.objects.filter(participants=self.request.user).order_by(
             "-created_at"
         )
 
@@ -169,6 +161,7 @@ class ConversationDetailAPIView(APIView):
     - GET: Retrieve the conversation by ID.
     - DELETE: Delete the conversation if the user is a participant.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, conversation_id):
@@ -176,8 +169,7 @@ class ConversationDetailAPIView(APIView):
             conversation = Conversation.objects.get(id=conversation_id)
             if request.user not in conversation.participants.all():
                 return Response(
-                    {"error": "You don't have permission to view this "
-                     "conversation"},
+                    {"error": "You don't have permission to view this " "conversation"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
             serializer = ConversationSerializer(
@@ -186,8 +178,7 @@ class ConversationDetailAPIView(APIView):
             return Response(serializer.data)
         except Conversation.DoesNotExist:
             return Response(
-                {"error": "Conversation not found"},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
     def delete(self, request, conversation_id):
@@ -195,16 +186,17 @@ class ConversationDetailAPIView(APIView):
             conversation = Conversation.objects.get(id=conversation_id)
             if request.user not in conversation.participants.all():
                 return Response(
-                    {"error": "You don't have permission to delete this "
-                     "conversation"},
+                    {
+                        "error": "You don't have permission to delete this "
+                        "conversation"
+                    },
                     status=status.HTTP_403_FORBIDDEN,
                 )
             conversation.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Conversation.DoesNotExist:
             return Response(
-                {"error": "Conversation not found"},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -213,6 +205,7 @@ class UserListAPIView(ListAPIView):
     API view for listing users, with optional search and ordering
     functionality.
     """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]

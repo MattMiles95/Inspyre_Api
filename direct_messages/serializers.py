@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     profile_image = serializers.ImageField(
         source="profile.image", read_only=True
-    )
+        )
 
     class Meta:
         model = User
@@ -86,13 +86,15 @@ class DirectMessageSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     """
     Serializer for the Conversation model, providing participant details,
-    the latest message, and a reference to the other user in the conversation.
+    the latest message, whether there are any unread messages,and a
+    reference to the other user in the conversation.
 
     Includes nested UserSerializer for participants and the latest message.
     """
     participants = UserSerializer(many=True, read_only=True)
     latest_message = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
+    has_unread_messages = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
@@ -103,18 +105,22 @@ class ConversationSerializer(serializers.ModelSerializer):
             "latest_message",
             "created_at",
             "other_user",
+            "has_unread_messages",
         ]
 
     def get_latest_message(self, obj):
         latest = obj.messages.order_by("-created_at").first()
-        if latest:
-            return DirectMessageSerializer(latest).data
-        return None
+        return DirectMessageSerializer(latest).data if latest else None
 
     def get_other_user(self, obj):
         request = self.context.get("request")
-        if not request:
-            return None
         user = request.user
-        other = obj.participants.exclude(id=user.id).first()
-        return UserSerializer(other).data if other else None
+        other_user = obj.participants.exclude(id=user.id).first()
+        return UserSerializer(other_user).data if other_user else None
+
+    def get_has_unread_messages(self, obj):
+        """
+        Check if the user has any unread messages in this conversation.
+        """
+        user = self.context["request"].user
+        return obj.messages.filter(receiver=user, read=False).exists()
