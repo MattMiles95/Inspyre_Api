@@ -28,7 +28,7 @@ class MessageListAPIView(ListCreateAPIView):
     API view for listing and creating direct messages.
 
     - GET: Retrieve a list of direct messages based on conversation ID or
-    receiver ID.
+      receiver ID.
     - POST: Create a new direct message for the authenticated user.
     """
 
@@ -81,13 +81,17 @@ class MessageDetailAPIView(APIView):
         try:
             message = DirectMessage.objects.select_related(
                 "sender", "receiver"
-            ).get(
-                id=message_id
-            )
+            ).get(id=message_id)
 
-            if message.sender != request.user and message.receiver != request.user:
+            if (
+                message.sender != request.user and
+                message.receiver != request.user
+            ):
                 return Response(
-                    {"error": "You don't have permission " "to view this message"},
+                    {
+                        "error": "You don't have permission to view this "
+                        "message"
+                    },
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
@@ -99,7 +103,8 @@ class MessageDetailAPIView(APIView):
             return Response(serializer.data)
         except DirectMessage.DoesNotExist:
             return Response(
-                {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Message not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
 
     def patch(self, request, message_id):
@@ -109,8 +114,8 @@ class MessageDetailAPIView(APIView):
             if message.receiver != request.user:
                 return Response(
                     {
-                        "error": "You don't have permission to mark "
-                        "this message as read"
+                        "error": "You don't have permission to mark this "
+                        "message as read"
                     },
                     status=status.HTTP_403_FORBIDDEN,
                 )
@@ -120,7 +125,8 @@ class MessageDetailAPIView(APIView):
             return Response(serializer.data)
         except DirectMessage.DoesNotExist:
             return Response(
-                {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Message not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
 
     def delete(self, request, message_id):
@@ -128,14 +134,18 @@ class MessageDetailAPIView(APIView):
             message = DirectMessage.objects.get(id=message_id)
             if message.sender != request.user:
                 return Response(
-                    {"error": "You don't have permission to delete this " "message"},
+                    {
+                        "error": "You don't have permission to delete this "
+                        "message"
+                    },
                     status=status.HTTP_403_FORBIDDEN,
                 )
             message.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except DirectMessage.DoesNotExist:
             return Response(
-                {"error": "Message not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Message not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -149,9 +159,9 @@ class ConversationListAPIView(ListAPIView):
     pagination_class = MessagePagination
 
     def get_queryset(self):
-        return Conversation.objects.filter(participants=self.request.user).order_by(
-            "-created_at"
-        )
+        return Conversation.objects.filter(
+            participants=self.request.user
+        ).order_by("-created_at")
 
 
 class ConversationDetailAPIView(APIView):
@@ -169,7 +179,10 @@ class ConversationDetailAPIView(APIView):
             conversation = Conversation.objects.get(id=conversation_id)
             if request.user not in conversation.participants.all():
                 return Response(
-                    {"error": "You don't have permission to view this " "conversation"},
+                    {
+                        "error": "You don't have permission to view this "
+                        "conversation"
+                    },
                     status=status.HTTP_403_FORBIDDEN,
                 )
             serializer = ConversationSerializer(
@@ -178,7 +191,8 @@ class ConversationDetailAPIView(APIView):
             return Response(serializer.data)
         except Conversation.DoesNotExist:
             return Response(
-                {"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Conversation not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
 
     def delete(self, request, conversation_id):
@@ -196,7 +210,8 @@ class ConversationDetailAPIView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Conversation.DoesNotExist:
             return Response(
-                {"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Conversation not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
 
 

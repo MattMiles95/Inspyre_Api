@@ -330,7 +330,9 @@ The **Direct Messages** app facilitates private messaging between users, allowin
 
 - **Message Creation**: Users can send direct messages to other users, and the app will automatically handle conversation creation if one does not already exist.
 
-- **Message Read Status**: Messages include a `read` field that is updated when the recipient views the message. At this time, this feature has not been implemented within the frontend, but is discussed further within the **Future Features** section of the [frontend README](https://github.com/MattMiles95/PP5_Inspyre_Frontend/blob/main/README.md).
+- **Unread Messages Indicator**: Conversations include a `has_unread_messages` field, which identifies whether there are unread messages for the current user in a given conversation. This status is dynamically updated when the conversation is opened and messages are marked as read.
+
+- **Message Read Status**: Messages include a read field that is updated when the recipient views the conversation.
 
 - **Message Preview**: Each message includes a `preview` property that provides a truncated version of the content for quick display in conversation listings.
 

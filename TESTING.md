@@ -44,24 +44,26 @@ Extensive manual testing was conducted on the backend logic of this project to e
 
 ### Database
 
-| **Feature**           | **Expected Outcome**                                                                                                                     | **Result** |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Create Account        | Given a user creates an account, a Profile is automatically created and assigned to that account.                                        | Pass       |
-| Delete Account        | Given an account is deleted, the child data of that account is also deleted.                                                             | Pass       |
-| Post                  | Given a user creates a post, that post is created in the expected location within the database.                                          | Pass       |
-| Post Edit             | Given a user edits a post, the details of that post stored in the database are updated accordingly.                                      | Pass       |
-| Post Delete           | Given a user deletes a post, the post and its associated comments and likes are removed from the database.                               | Pass       |
-| Follow                | Given a user follows another user, a new Follower instance is created and associated with both the follower and the followed user.       | Pass       |
-| Unfollow              | Given a user unfollows another user, the Follower instance is deleted from the database.                                                 | Pass       |
-| Like                  | Given a user likes a post, a new Like instance is created and associated with both the user and the post.                                | Pass       |
-| Unlike                | Given a user unlikes a post, the associated Like instance is deleted from the database.                                                  | Pass       |
-| Create Comment        | Given a user creates a comment on a post, a new Comment instance is created and associated with both the user and the post.              | Pass       |
-| Edit Comment          | Given a user edits their comment, the content of the Comment instance is updated in the database.                                        | Pass       |
-| Delete Comment        | Given a user deletes their comment, the Comment instance and its replies are removed from the database.                                  | Pass       |
-| Create Comment Thread | Given a user replies to a comment, the reply is associated with the parent comment, forming a comment thread.                            | Pass       |
-| Create Conversation   | Given a user sends a direct message to another user, a new Conversation instance is created if one does not already exist.               | Pass       |
-| Delete Conversation   | Given a user deletes a conversation, the Conversation instance and all associated messages are removed from the database.                | Pass       |
-| Send Message          | Given a user sends a message within a conversation, a new DirectMessage instance is created and associated with the sender and receiver. | Pass       |
+| **Feature**            | **Expected Outcome**                                                                                                                             | **Result** |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| Create Account         | Given a user creates an account, a Profile is automatically created and assigned to that account.                                                | Pass       |
+| Delete Account         | Given an account is deleted, the child data of that account is also deleted.                                                                     | Pass       |
+| Post                   | Given a user creates a post, that post is created in the expected location within the database.                                                  | Pass       |
+| Post Edit              | Given a user edits a post, the details of that post stored in the database are updated accordingly.                                              | Pass       |
+| Post Delete            | Given a user deletes a post, the post and its associated comments and likes are removed from the database.                                       | Pass       |
+| Follow                 | Given a user follows another user, a new Follower instance is created and associated with both the follower and the followed user.               | Pass       |
+| Unfollow               | Given a user unfollows another user, the Follower instance is deleted from the database.                                                         | Pass       |
+| Like                   | Given a user likes a post, a new Like instance is created and associated with both the user and the post.                                        | Pass       |
+| Unlike                 | Given a user unlikes a post, the associated Like instance is deleted from the database.                                                          | Pass       |
+| Create Comment         | Given a user creates a comment on a post, a new Comment instance is created and associated with both the user and the post.                      | Pass       |
+| Edit Comment           | Given a user edits their comment, the content of the Comment instance is updated in the database.                                                | Pass       |
+| Delete Comment         | Given a user deletes their comment, the Comment instance and its replies are removed from the database.                                          | Pass       |
+| Create Comment Thread  | Given a user replies to a comment, the reply is associated with the parent comment, forming a comment thread.                                    | Pass       |
+| Create Conversation    | Given a user sends a direct message to another user, a new Conversation instance is created if one does not already exist.                       | Pass       |
+| Delete Conversation    | Given a user deletes a conversation, the Conversation instance and all associated messages are removed from the database.                        | Pass       |
+| Send Message           | Given a user sends a message within a conversation, a new DirectMessage instance is created and associated with the sender and receiver.         | Pass       |
+| Unread Message in Chat | When a new message is received, the read field remains False, and the `has_unread_messages` field identifies conversations with unread messages. | Pass       |
+| Auto-Read Messages     | When a conversation is opened, unread messages for the user are marked as read and the `has_unread_messages` field is updated.                   | Pass       |
 
 <br>
 
