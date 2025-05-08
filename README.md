@@ -16,13 +16,13 @@ Powering a dynamic content-sharing platform, the Inspyre DRF API supports secure
 
 ### [Design](#design-1)
 
-### [Logic Behind the Features](#features--logic-1)
+### [Logic Behind the Features](#logic-behind-the-features-1)
 
 - [Authorisation](#authorisation)
 - [Profiles](#profiles)
 - [Posts](#posts)
-- [Likes](#likes--trending-posts)
-- [Follow System](#post-searchbar)
+- [Likes](#likes)
+- [Follow System](#follow-system)
 - [Comments](#comments)
 - [Direct Messaging](#direct-messaging)
 
@@ -391,7 +391,7 @@ In order to prioritise my User Stories, I used MoSCoW Prioritisation to label ea
 
 ### GitHub Project - Kanban Board
 
-I used GitHub Issues and Projects to manage the above-mentioned process. Each issue provided a User Story, which was placed on a Kanban board in my Inspyre Project. This board was separated into 4 columns: 'To Do', 'In Progress', 'Done' and 'Not Required This Iteration'. I linked both my frontend and backend repos to this project, which can be viewed [here](https://github.com/users/MattMiles95/projects/8/views/1)
+I used GitHub Issues and Projects to manage the above-mentioned process. Each issue provided a User Story, which was placed on a Kanban board in my Inspyre Project. This board was separated into 4 columns: 'To Do', 'In Progress', 'Done' and 'Not Required This Iteration'. I linked both my frontend and backend repos to this project, which can be viewed [here](https://github.com/users/MattMiles95/projects/8/views/1).
 
 <br>
 

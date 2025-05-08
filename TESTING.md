@@ -2,9 +2,9 @@
 
 This is the TESTING file for the backend DRF API for [Inspyre](https://inspyre-53afb73e4a64.herokuapp.com/), a full stack application focused on content creation and sharing.
 
-Return to the [README](./README.md)
+Return to the [README](./README.md).
 
-View the TESTING file for the frontend React app [here](#https://github.com/MattMiles95/PP5_Inspyre_Frontend/blob/main/TESTING.md)
+View the TESTING file for the frontend React app [here](#https://github.com/MattMiles95/PP5_Inspyre_Frontend/blob/main/TESTING.md).
 
 ## Table of Contents
 
