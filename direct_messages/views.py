@@ -13,12 +13,23 @@ from .serializers import UserSerializer
 
 
 class MessagePagination(PageNumberPagination):
+    """
+    Pagination class for messages, allowing customization of page size.
+    Default page size is 20, with a maximum of 100 messages per page.
+    """
     page_size = 20
     page_size_query_param = "page_size"
     max_page_size = 100
 
 
 class MessageListAPIView(ListCreateAPIView):
+    """
+    API view for listing and creating direct messages.
+
+    - GET: Retrieve a list of direct messages based on conversation ID or
+    receiver ID.
+    - POST: Create a new direct message for the authenticated user.
+    """
     serializer_class = DirectMessageSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = MessagePagination
@@ -26,6 +37,9 @@ class MessageListAPIView(ListCreateAPIView):
     ordering_fields = ["created_at", "read"]
 
     def get_queryset(self):
+        """
+        Return a queryset of messages based on conversation ID or receiver ID.
+        """
         conversation_id = self.request.GET.get("conversation_id")
         receiver_id = self.request.GET.get("receiver")
 
@@ -57,6 +71,13 @@ class MessageListAPIView(ListCreateAPIView):
 
 
 class MessageDetailAPIView(APIView):
+    """
+    API view for retrieving, updating, or deleting a specific direct message.
+
+    - GET: Retrieve the message by ID.
+    - PATCH: Mark the message as read by the receiver.
+    - DELETE: Delete the message if the sender is the authenticated user.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, message_id):
@@ -88,6 +109,7 @@ class MessageDetailAPIView(APIView):
             )
 
     def patch(self, request, message_id):
+        """Mark the message as read by the receiver."""
         try:
             message = DirectMessage.objects.get(id=message_id)
             if message.receiver != request.user:
@@ -125,6 +147,9 @@ class MessageDetailAPIView(APIView):
 
 
 class ConversationListAPIView(ListAPIView):
+    """
+    API view for listing conversations involving the authenticated user.
+    """
     serializer_class = ConversationSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = MessagePagination
@@ -138,6 +163,12 @@ class ConversationListAPIView(ListAPIView):
 
 
 class ConversationDetailAPIView(APIView):
+    """
+    API view for retrieving or deleting a specific conversation.
+
+    - GET: Retrieve the conversation by ID.
+    - DELETE: Delete the conversation if the user is a participant.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, conversation_id):
@@ -178,6 +209,10 @@ class ConversationDetailAPIView(APIView):
 
 
 class UserListAPIView(ListAPIView):
+    """
+    API view for listing users, with optional search and ordering
+    functionality.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]

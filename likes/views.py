@@ -6,9 +6,11 @@ from likes.serializers import LikeSerializer
 
 class LikeList(generics.ListCreateAPIView):
     """
-    List likes or create a like if logged in.
-    """
+    API view for listing likes or creating a new like.
 
+    - GET: Retrieve a list of likes.
+    - POST: Create a new like if the user is authenticated.
+    """
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = LikeSerializer
     queryset = Like.objects.all()
@@ -19,9 +21,11 @@ class LikeList(generics.ListCreateAPIView):
 
 class LikeDetail(generics.RetrieveDestroyAPIView):
     """
-    Retrieve a like or delete it by id if you own it.
-    """
+    API view for retrieving or deleting a like by its ID.
 
+    - GET: Retrieve a specific like.
+    - DELETE: Delete the like if the user is the owner.
+    """
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = LikeSerializer
     queryset = Like.objects.all()

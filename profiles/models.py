@@ -4,6 +4,14 @@ from django.contrib.auth.models import User
 
 
 class ProfileTag(models.Model):
+    """
+    Model representing a tag associated with a user profile, indicating roles
+    such as Writer, Artist, or Photographer.
+
+    Attributes:
+        name (str): The name of the profile tag (unique, chosen from
+        predefined choices).
+    """
     profile_tags_choices = [
         ("writer", "Writer"),
         ("artist", "Artist"),
@@ -18,7 +26,18 @@ class ProfileTag(models.Model):
 
 
 class Profile(models.Model):
+    """
+    Model representing a user profile, extending the User model with
+    additional fields such as bio, profile tags, and profile image.
 
+    Attributes:
+        owner (User): The user to whom the profile belongs.
+        name (str): The display name for the profile.
+        profile_tags (ManyToManyField): Tags associated with the profile,
+        e.g., Writer, Artist.
+        content (str): A brief bio or description of the user.
+        image (ImageField): Profile image with a default placeholder.
+    """
     owner = models.OneToOneField(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

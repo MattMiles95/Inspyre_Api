@@ -13,16 +13,20 @@ from followers.serializers import UserMiniSerializer
 
 
 class ProfileTagListView(generics.ListAPIView):
+    """
+    API view for listing all profile tags.
+    """
     queryset = ProfileTag.objects.all()
     serializer_class = ProfileTagSerializer
 
 
 class ProfileList(generics.ListAPIView):
     """
-    List all profiles.
-    No create view as profile creation is handled by django signals.
-    """
+    API view for listing all profiles.
 
+    - GET: Retrieve all profiles with annotation for post, follower, and
+    following counts.
+    """
     queryset = Profile.objects.annotate(
         posts_count=Count("owner__post", distinct=True),
         followers_count=Count("owner__followed", distinct=True),
@@ -48,9 +52,8 @@ class ProfileList(generics.ListAPIView):
 
 class ProfileDetail(generics.RetrieveUpdateAPIView):
     """
-    Retrieve or update a profile if you're the owner.
+    API view for retrieving or updating a profile if the user is the owner.
     """
-
     permission_classes = [IsOwnerOrReadOnly]
     queryset = Profile.objects.annotate(
         posts_count=Count("owner__post", distinct=True),
@@ -61,6 +64,9 @@ class ProfileDetail(generics.RetrieveUpdateAPIView):
 
 
 class UserDeleteView(APIView):
+    """
+    API view for deleting the authenticated user's account.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
@@ -70,6 +76,9 @@ class UserDeleteView(APIView):
 
 
 class FollowersListView(generics.ListAPIView):
+    """
+    API view for listing the followers of a user by user ID.
+    """
     serializer_class = UserMiniSerializer
 
     def get_queryset(self):
@@ -83,6 +92,9 @@ class FollowersListView(generics.ListAPIView):
 
 
 class FollowingListView(generics.ListAPIView):
+    """
+    API view for listing the users that a user is following by user ID.
+    """
     serializer_class = UserMiniSerializer
 
     def get_queryset(self):

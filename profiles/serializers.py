@@ -5,12 +5,23 @@ from .models import ProfileTag
 
 
 class ProfileTagSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the ProfileTag model, providing the tag ID and name.
+    Used for displaying and creating profile tags.
+    """
     class Meta:
         model = ProfileTag
         fields = ["id", "name"]
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Profile model, handling creation, update, and retrieval
+    of user profiles.
+
+    Includes additional fields for ownership, follow status, post count, and
+    profile tags.
+    """
     owner = serializers.ReadOnlyField(source="owner.username")
     is_owner = serializers.SerializerMethodField()
     following_id = serializers.SerializerMethodField()

@@ -4,16 +4,29 @@ from likes.models import Like
 
 
 class PostTagSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the PostTag model, providing the tag name.
+    Used for representing and creating tags associated with posts.
+    """
     class Meta:
         model = PostTag
         fields = ["name"]
 
 
 class PostSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Post model, handling creation, updating, and validation
+    of posts.
+
+    Includes additional fields for owner information, tags, like status, and
+    profile details.
+    """
     owner = serializers.ReadOnlyField(source="owner.username")
     is_owner = serializers.SerializerMethodField()
     profile_id = serializers.ReadOnlyField(source="owner.profile.id")
-    profile_image = serializers.ReadOnlyField(source="owner.profile.image.url")
+    profile_image = serializers.ReadOnlyField(
+        source="owner.profile.image.url"
+    )
     profile_tags = serializers.SerializerMethodField()
     like_id = serializers.SerializerMethodField()
     likes_count = serializers.ReadOnlyField()
@@ -24,6 +37,10 @@ class PostSerializer(serializers.ModelSerializer):
     )
 
     def validate_image(self, value):
+        """
+        Validate the image size and dimensions.
+        Limits size to 2MB and dimensions to 4096x4096px.
+        """
         if value.size > 2 * 1024 * 1024:
             raise serializers.ValidationError(
                 "Image size larger than 2MB!"

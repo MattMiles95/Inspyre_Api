@@ -11,10 +11,12 @@ from .serializers import PostSerializer
 
 class PostList(generics.ListCreateAPIView):
     """
-    List posts or create a post if logged in
-    The perform_create method associates the post with the logged in user.
-    """
+    API view for listing and creating posts.
 
+    - GET: Retrieve a list of posts with optional filtering, searching, and
+    ordering.
+    - POST: Create a new post associated with the authenticated user.
+    """
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Post.objects.annotate(
@@ -51,9 +53,13 @@ class PostList(generics.ListCreateAPIView):
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    Retrieve a post and edit or delete it if you own it.
-    """
+    API view for retrieving, updating, or deleting a specific post.
 
+    - GET: Retrieve a post by its ID.
+    - PUT/PATCH: Update the post content or associated data if the user is
+    the owner.
+    - DELETE: Delete the post if the user is the owner.
+    """
     serializer_class = PostSerializer
     permission_classes = [IsOwnerOrReadOnly]
     queryset = Post.objects.annotate(
@@ -66,7 +72,7 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
 @permission_classes([AllowAny])
 def trending_posts(request):
     """
-    Returns the top 5 most liked approved posts.
+    Retrieve the top 10 most liked, approved posts.
     """
     trending = (
         Post.objects.filter(approval_status=0)

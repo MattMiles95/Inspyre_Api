@@ -11,6 +11,14 @@ from rest_framework import status, permissions
 
 
 class ReportComment(APIView):
+    """
+    API view to handle reporting a comment. Updates the comment's approval
+    status to 'reported'.
+
+    Methods:
+        put(self, request, pk): Updates the approval status of the specified
+        comment to 'reported'.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request, pk):
@@ -31,7 +39,10 @@ class ReportComment(APIView):
 
 class CommentList(generics.ListCreateAPIView):
     """
-    List comments or create a comment if logged in.
+    API view to list comments or create a new comment.
+
+    - GET: Retrieve a list of comments filtered by post.
+    - POST: Create a new comment for the authenticated user.
     """
 
     serializer_class = CommentSerializer
@@ -40,15 +51,25 @@ class CommentList(generics.ListCreateAPIView):
     filterset_fields = ["post"]
 
     def get_queryset(self):
+        """
+        Return a queryset of top-level comments (excluding replies).
+        """
         return Comment.objects.filter(parent__isnull=True)
 
     def perform_create(self, serializer):
+        """
+        Save the new comment with the current user as the owner.
+        """
         serializer.save(owner=self.request.user)
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    Retrieve a comment, or update or delete it by id if you own it.
+    API view to retrieve, update, or delete a comment.
+
+    - GET: Retrieve a specific comment by ID.
+    - PUT: Update the comment content if the user is the owner.
+    - DELETE: Delete the comment if the user is the owner.
     """
 
     permission_classes = [IsOwnerOrReadOnly]

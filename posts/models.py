@@ -6,6 +6,12 @@ APPROVAL_STATUS = ((0, "Approved"), (1, "Reported"))
 
 
 class PostTag(models.Model):
+    """
+    Model representing a tag that can be associated with a post.
+
+    Attributes:
+        name (str): The name of the tag (unique).
+    """
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
@@ -14,10 +20,22 @@ class PostTag(models.Model):
 
 class Post(models.Model):
     """
-    Post model, related to 'owner', i.e. a User instance.
-    Default image set so that we can always reference image.url.
-    """
+    Model representing a post created by a user, which can include content,
+    an image, and associated tags. Supports approval status for moderation.
 
+    Attributes:
+        owner (User): The user who created the post.
+        created_at (datetime): The timestamp of when the post was created.
+        updated_at (datetime): The timestamp of the last update to the post.
+        title (str): The title of the post.
+        content (str): The text content of the post.
+        image (ImageField): An optional image associated with the post.
+        post_tags (ManyToManyField): Tags associated with the post.
+        approval_status (int): Approval status, 0 for approved, 1 for
+        reported.
+        original_author (bool): Flag indicating if the user is the original
+        author.
+    """
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -38,7 +56,12 @@ class Post(models.Model):
     )
 
     def get_thumbnail_url(self):
-        """Returns URL for thumbnail display"""
+        """
+        Returns a URL for the post thumbnail.
+        If an image is available, its URL is returned.
+        If content is present but no image, a truncated content preview URL
+        is returned.
+        """
         if self.image:
             return self.image.url
         elif self.content:
@@ -48,7 +71,10 @@ class Post(models.Model):
 
     @property
     def thumbnail(self):
-        """Property to handle thumbnail display logic"""
+        """
+        Property to handle thumbnail display logic, returning a dictionary
+        with 'type' (image or content) and 'url' or 'preview'.
+        """
         url = self.get_thumbnail_url()
         if url.startswith("/content-preview/"):
             return {"type": "content", "preview": url.split("/")[-1]}
